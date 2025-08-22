@@ -54,10 +54,10 @@
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up animate-delay-400">
-                    <flux:button variant="primary" size="lg" href="{{ route('register') }}" class="px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <flux:button variant="primary" size="sm" href="{{ route('register') }}" class="px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                         Get Started Now
                     </flux:button>
-                    <flux:button variant="ghost" size="lg" href="#services" class="px-8 py-4 text-lg font-semibold border-2 border-gray-300 dark:border-zinc-600 hover:border-gray-400 dark:hover:border-zinc-500 transition-all duration-300">
+                    <flux:button variant="ghost" size="sm" href="#services" class="px-8 py-4 text-lg font-semibold border-2 border-gray-300 dark:border-zinc-600 hover:border-gray-400 dark:hover:border-zinc-500 transition-all duration-300">
                         Explore Services
                     </flux:button>
                 </div>
@@ -156,7 +156,7 @@
                             <div class="text-6xl mb-4">🚀</div>
                             <h3 class="text-2xl font-bold mb-2">Ready to get started?</h3>
                             <p class="text-lg opacity-90 mb-6">Join thousands of satisfied users today</p>
-                            <flux:button variant="secondary" size="lg" href="{{ route('register') }}" class="bg-white text-blue-600 hover:bg-gray-100 border-0">
+                            <flux:button variant="filled" size="sm" href="{{ route('register') }}" class="bg-white text-blue-600 hover:bg-gray-100 border-0">
                                 Sign Up Now
                             </flux:button>
                         </div>
@@ -176,7 +176,7 @@
                 <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
                     Experience the future of recharge services. Fast, secure, and reliable.
                 </p>
-                <flux:button variant="secondary" size="lg" href="{{ route('register') }}" class="bg-white text-blue-600 hover:bg-gray-100 border-0 px-12 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <flux:button variant="filled" size="sm" href="{{ route('register') }}" class="bg-white text-blue-600 hover:bg-gray-100 border-0 px-12 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                     Get Started Free
                 </flux:button>
             </div>
@@ -233,6 +233,8 @@
             </div>
         </flux:container>
     </footer>
+
+    @fluxScripts
 </body>
 
 </html>
