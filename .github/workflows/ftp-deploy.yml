@@ -24,7 +24,6 @@ jobs:
           server-dir: ${{ secrets.FTP_TARGET_DIR }}
           exclude: |
             **/.git*
-            **/.env
             **/vendor/**
             **/tests/**
           dry-run: false
