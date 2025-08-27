@@ -5,7 +5,6 @@
     @include('partials.head')
 </head>
 
-
 <body class="min-h-screen bg-white dark:bg-zinc-900">
     <!-- Navigation -->
     <nav class="fixed top-0 w-full bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-gray-200 dark:border-zinc-800 z-50">

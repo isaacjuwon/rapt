@@ -94,7 +94,7 @@ new #[Title('My Loans')] class extends Component {
             <div class="flex items-center justify-between">
                 <div>
                     <flux:text size="sm" color="secondary">Outstanding</flux:text>
-                    <flux:text size="lg" weight="semibold">${{ number_format($this->stats['outstanding_balance'], 2) }}</flux:text>
+                    <flux:text size="lg" weight="semibold">{{ \Illuminate\Support\Number::currency($this->stats['outstanding_balance']) }}</flux:text>
                 </div>
                 <flux:icon icon="currency-dollar" variant="solid" class="text-purple-500" />
             </div>
@@ -152,7 +152,7 @@ new #[Title('My Loans')] class extends Component {
                     </flux:table.cell>
                     <flux:table.cell>
                         <div>
-                            <flux:text weight="medium">${{ number_format($loan['principal_amount'], 2) }}</flux:text>
+                            <flux:text weight="medium">{{ \Illuminate\Support\Number::currency($loan['principal_amount']) }}</flux:text>
                             <flux:text size="sm" color="secondary">{{ $loan['interest_rate'] }}%</flux:text>
                         </div>
                     </flux:table.cell>

@@ -1,6 +1,7 @@
 <?php
 
 use Flux\Flux;
+use Masmerise\Toaster\Toaster;
 use App\Models\Brand;
 use Illuminate\View\View;
 use App\Models\AirtimePlan;
@@ -106,7 +107,7 @@ new #[Title('Manage Airtime')] #[Layout('layouts.components.admin')] class exten
     public function confirmDeleteAirtimePlan(): void
     {
         if ($this->selected_plan->id === Auth::airtimePlan()->id) {
-            Flux::toast(variant: 'danger', text: __('You cannot delete your own account.'));
+            Toaster::error(__('You cannot delete your own account.'));
 
             return;
         }
@@ -119,7 +120,7 @@ new #[Title('Manage Airtime')] #[Layout('layouts.components.admin')] class exten
         }
         $this->modal('delete-airtimePlan')->close();
 
-        Flux::toast(variant: 'success', text: __('AirtimePlan deleted successfully.'));
+        Toaster::success(__('AirtimePlan deleted successfully.'));
     }
 
     public function with(): array

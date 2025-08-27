@@ -1,6 +1,7 @@
 <?php
 
 use Flux\Flux;
+use Masmerise\Toaster\Toaster;
 use App\Models\Brand;
 use Livewire\Attributes\Url;
 use Livewire\Volt\Component;
@@ -113,7 +114,7 @@ new #[Layout('components.layouts.admin')] #[Title('Manage Brands')] class extend
         $this->resetPage();
         $this->modal('create-brand')->close();
 
-        Flux::toast(variant: 'success', text: __('Brand created successfully.'));
+        Toaster::success(__('Brand created successfully.'));
     }
 
     /**
@@ -139,7 +140,7 @@ new #[Layout('components.layouts.admin')] #[Title('Manage Brands')] class extend
         ]);
 
         /*  if ($this->name === $this->selected_brand->name && $this->description === $this->selected_brand->description) {
-            Flux::toast(variant: 'info', text: __('Nothing changed.'));
+            Toaster::info(__('Nothing changed.'));
 
             return;
         } */
@@ -155,7 +156,7 @@ new #[Layout('components.layouts.admin')] #[Title('Manage Brands')] class extend
 
         $this->modal('edit-brand')->close();
 
-        Flux::toast(variant: 'success', text: __('Brand updated successfully.'));
+        Toaster::success(__('Brand updated successfully.'));
     }
 
     /**
@@ -172,7 +173,7 @@ new #[Layout('components.layouts.admin')] #[Title('Manage Brands')] class extend
     public function confirmDeleteBrand(): void
     {
         if ($this->selected_brand->id === Auth::brand()->id) {
-            Flux::toast(variant: 'danger', text: __('You cannot delete your own account.'));
+            Toaster::error(__('You cannot delete your own account.'));
 
             return;
         }
@@ -185,7 +186,7 @@ new #[Layout('components.layouts.admin')] #[Title('Manage Brands')] class extend
         }
         $this->modal('delete-brand')->close();
 
-        Flux::toast(variant: 'success', text: __('Brand deleted successfully.'));
+        Toaster::success(__('Brand deleted successfully.'));
     }
 }; ?>
 

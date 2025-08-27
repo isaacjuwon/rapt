@@ -12,6 +12,10 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Volt::route('verify', 'auth.verify')
+    ->middleware(['auth'])
+    ->name('verification.notice');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -42,6 +46,12 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('wallet/fund', 'wallet.fund')->name('wallet.fund');
     Route::get('wallet/callback', [App\Http\Controllers\WalletController::class, 'callback'])->name('wallet.callback');
 
+    // Transactions Routes
+    Volt::route('transactions', 'transaction.index')->name('transactions.index');
+
+    // Account Routes
+    Volt::route('account', 'account.index')->name('account.index');
+
     // Media Routes
     Volt::route('media/browser', 'media.media-browser')->name('media.browser');
     Volt::route('media/gallery', 'media.media-gallery')->name('media.media-gallery');
@@ -52,3 +62,9 @@ Route::middleware(['auth'])->group(function () {
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/admin.php';
+
+Route::controller(App\Http\Controllers\Oauth\OauthController::class)->group(function () {
+    Route::get('auth/{provider}/redirect', 'redirect')->name('oauth.redirect');
+    Route::get('auth/{provider}/callback', 'callback')->name('oauth.callback');
+    Route::delete('auth/{provider}/destroy', 'destroy')->name('oauth.destroy');
+});

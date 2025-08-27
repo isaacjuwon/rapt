@@ -21,6 +21,19 @@ trait HandlesDeposit
      */
     public function deposit(string|WalletType $type, float $amount, ?string $notes = null): bool
     {
+        $settings = app(\App\Settings\WalletSettings::class);
+        if (!$settings->wallet_enabled) {
+            throw new \RuntimeException('Wallet is currently disabled.');
+        }
+
+        if ($amount < $settings->minimum_deposit) {
+            throw new InvalidValueException("Minimum deposit amount is {$settings->minimum_deposit}.");
+        }
+
+        if ($amount > $settings->maximum_deposit) {
+            throw new InvalidValueException("Maximum deposit amount is {$settings->maximum_deposit}.");
+        }
+
         $typeValue = $type instanceof WalletType ? $type->value : $type;
         $walletType = $type instanceof WalletType ? $type : WalletType::tryFrom($typeValue);
 

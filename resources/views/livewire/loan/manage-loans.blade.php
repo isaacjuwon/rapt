@@ -212,7 +212,7 @@ new #[Title('Loan Management')] class extends Component {
             <div class="flex items-center justify-between">
                 <div>
                     <flux:text size="sm" color="secondary">Outstanding</flux:text>
-                    <flux:text size="lg" weight="semibold">${{ number_format($this->statistics['outstanding_balance'], 2) }}</flux:text>
+                    <flux:text size="lg" weight="semibold">{{ \Illuminate\Support\Number::currency($this->statistics['outstanding_balance']) }}</flux:text>
                 </div>
                 <flux:icon icon="currency-dollar" variant="solid" class="text-purple-500" />
             </div>
@@ -248,13 +248,13 @@ new #[Title('Loan Management')] class extends Component {
                 @foreach($activeLoans as $loan)
                 <flux:table.row>
                     <flux:table.cell>{{ $loan->loan_number }}</flux:table.cell>
-                    <flux:table.cell>${{ number_format($loan->amount, 2) }}</flux:table.cell>
+                    <flux:table.cell>{{ \Illuminate\Support\Number::currency($loan->amount) }}</flux:table.cell>
                     <flux:table.cell>
                         <flux:badge :variant="$loan->status === 'approved' ? 'success' : 'warning'">
                             {{ $loan->status }}
                         </flux:badge>
                     </flux:table.cell>
-                    <flux:table.cell>${{ number_format($loan->remaining_balance, 2) }}</flux:table.cell>
+                    <flux:table.cell>{{ \Illuminate\Support\Number::currency($loan->remaining_balance) }}</flux:table.cell>
                     <flux:table.cell>
                         <flux:button wire:click="showPaymentForm({{ $loan->id }})" size="sm" variant="outline">
                             Make Payment
@@ -305,7 +305,7 @@ new #[Title('Loan Management')] class extends Component {
             @if($selectedLoan)
             <div class="mb-4">
                 <flux:text size="sm" color="secondary">Loan Number: {{ $selectedLoan->loan_number }}</flux:text>
-                <flux:text size="sm" color="secondary">Outstanding Balance: ${{ number_format($selectedLoan->remaining_balance, 2) }}</flux:text>
+                <flux:text size="sm" color="secondary">Outstanding Balance: {{ \Illuminate\Support\Number::currency($selectedLoan->remaining_balance) }}</flux:text>
             </div>
             @endif
 

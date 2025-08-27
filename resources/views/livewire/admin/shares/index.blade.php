@@ -162,7 +162,7 @@ new class extends Component {
                     </div>
                     <div>
                         <div class="font-semibold">{{ $transaction->user->name }}</div>
-                        <div class="text-sm text-gray-500">{{ $transaction->quantity }} shares - ${{ number_format($transaction->total_amount, 2) }}</div>
+                        <div class="text-sm text-gray-500">{{ $transaction->quantity }} shares - {{ \Illuminate\Support\Number::currency($transaction->total_amount) }}</div>
                     </div>
                 </div>
                 <div class="flex space-x-2">
@@ -301,7 +301,7 @@ new class extends Component {
                             {{ number_format($transaction->quantity, 0) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            ${{ number_format($transaction->total_amount, 2) }}
+                            {{ \Illuminate\Support\Number::currency($transaction->total_amount) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium

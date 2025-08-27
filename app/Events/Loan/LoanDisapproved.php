@@ -2,6 +2,7 @@
 
 namespace App\Events\Loan;
 
+use App\Models\Loan; // Import the Loan model
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -24,7 +25,7 @@ class LoanDisapproved extends LoanEvent
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new PrivateChannel('loan.' . $this->loan->id),
         ];
     }
 }

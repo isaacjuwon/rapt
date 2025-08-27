@@ -1,6 +1,7 @@
 <?php
 
 use Flux\Flux;
+use Masmerise\Toaster\Toaster;
 use App\Models\User;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -109,7 +110,7 @@ new #[Title('Manage Users')] class extends Component {
         $this->resetPage();
         $this->modal('create-user')->close();
 
-        Flux::toast(variant: 'success', text: __('User created successfully.'));
+        Toaster::success(__('User created successfully.'));
     }
 
     /**
@@ -133,7 +134,7 @@ new #[Title('Manage Users')] class extends Component {
         ]);
 
         if ($this->name === $this->selected_user->name && $this->email === $this->selected_user->email) {
-            Flux::toast(variant: 'info', text: __('Nothing changed.'));
+            Toaster::info(__('Nothing changed.'));
 
             return;
         }
@@ -146,7 +147,7 @@ new #[Title('Manage Users')] class extends Component {
         $this->resetValues();
         $this->modal('edit-user')->close();
 
-        Flux::toast(variant: 'success', text: __('User updated successfully.'));
+        Toaster::success(__('User updated successfully.'));
     }
 
     /**
@@ -163,7 +164,7 @@ new #[Title('Manage Users')] class extends Component {
     public function confirmDeleteUser(): void
     {
         if ($this->selected_user->id === Auth::user()->id) {
-            Flux::toast(variant: 'danger', text: __('You cannot delete your own account.'));
+            Toaster::error(__('You cannot delete your own account.'));
 
             return;
         }
@@ -176,7 +177,7 @@ new #[Title('Manage Users')] class extends Component {
         }
         $this->modal('delete-user')->close();
 
-        Flux::toast(variant: 'success', text: __('User deleted successfully.'));
+        Toaster::success(__('User deleted successfully.'));
     }
 }; ?>
 
@@ -224,7 +225,6 @@ new #[Title('Manage Users')] class extends Component {
                     {{ __('Name') }}
                 </flux:table.column>
 
-                @if (auth()->user() && auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail)
                 <flux:table.column
                     wire:click="sort('email_verified_at')"
                     sortable
@@ -233,7 +233,15 @@ new #[Title('Manage Users')] class extends Component {
                     align="start">
                     {{ __('Email status') }}
                 </flux:table.column>
-                @endif
+
+                <flux:table.column
+                    wire:click="sort('is_verified')"
+                    sortable
+                    :sorted="$sortBy === 'is_verified'"
+                    :direction="$sortDirection"
+                    align="start">
+                    {{ __('Verification Status') }}
+                </flux:table.column>
 
                 <flux:table.column
                     wire:click="sort('created_at')"
@@ -280,7 +288,6 @@ new #[Title('Manage Users')] class extends Component {
                         </div>
                     </flux:table.cell>
 
-                    @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail)
                     <flux:table.cell
                         align="start"
                         class="whitespace-nowrap">
@@ -299,7 +306,25 @@ new #[Title('Manage Users')] class extends Component {
                         </flux:badge>
                         @endif
                     </flux:table.cell>
-                    @endif
+
+                    <flux:table.cell
+                        align="start"
+                        class="whitespace-nowrap">
+                        @if ($user->isVerified())
+                        <flux:badge
+                            size="sm"
+                            icon="check-badge">
+                            {{ __('Verified') }}
+                        </flux:badge>
+                        @else
+                        <flux:badge
+                            size="sm"
+                            icon="x-circle"
+                            class="opacity-50">
+                            {{ __('Unverified') }}
+                        </flux:badge>
+                        @endif
+                    </flux:table.table.cell>
 
                     <flux:table.cell class="whitespace-nowrap">
                         {{ $user->created_at->diffForHumans() }}

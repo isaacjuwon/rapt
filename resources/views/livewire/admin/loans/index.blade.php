@@ -97,7 +97,7 @@ new #[Layout('components.layouts.admin')] #[Title('Manage Loans')] class extends
     public function approveLoan(Loan $loan): void
     {
         if ($loan->status !== Loan::STATUS_PENDING) {
-            Flux::toast(variant: 'error', text: __('Only pending loans can be approved.'));
+            Toaster::error(__('Only pending loans can be approved.'));
             return;
         }
 

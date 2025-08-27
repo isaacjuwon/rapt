@@ -61,8 +61,8 @@ new #[Title('Apply for Loan')] class extends Component {
 
         return [
             'amount.required' => 'Please enter the loan amount.',
-            'amount.min' => 'Minimum loan amount is $' . number_format($settings->minimum_loan_amount, 2) . '.',
-            'amount.max' => 'Maximum loan amount is $' . number_format($settings->maximum_loan_amount, 2) . '.',
+            'amount.min' => 'Minimum loan amount is ' . \Illuminate\Support\Number::currency($settings->minimum_loan_amount) . '.',
+            'amount.max' => 'Maximum loan amount is ' . \Illuminate\Support\Number::currency($settings->maximum_loan_amount) . '.',
             'termMonths.required' => 'Please enter the loan term.',
             'termMonths.min' => 'Minimum loan term is ' . $settings->minimum_loan_term_months . ' months.',
             'termMonths.max' => 'Maximum loan term is ' . $settings->maximum_loan_term_months . ' months.',
@@ -103,8 +103,9 @@ new #[Title('Apply for Loan')] class extends Component {
     public function getMaxLoanAmount(): float
     {
         $user = auth()->user();
-        $shareValue = $user->getTotalShareValue();
-        return $shareValue * 3.33;
+        $shareValue = $user->getShareValue();
+        $settings = app(App\Settings\LoanSettings::class);
+        return $shareValue / ($settings->shares_requirement_percentage / 100);
     }
 }; ?>
 
@@ -150,7 +151,7 @@ new #[Title('Apply for Loan')] class extends Component {
 
         <form wire:submit="apply" class="space-y-6">
             <div>
-                <flux:label>Loan Amount ($)</flux:label>
+                <flux:label>Loan Amount</flux:label>
                 <flux:input
                     type="number"
                     wire:model.live="amount"
@@ -159,7 +160,7 @@ new #[Title('Apply for Loan')] class extends Component {
                     step="100"
                     placeholder="Enter loan amount" />
                 <flux:error name="amount" />
-                <flux:text size="xs" color="secondary">Maximum: ${{ number_format($this->getMaxLoanAmount(), 2) }}</flux:text>
+                <flux:text size="xs" color="secondary">Maximum: {{ \Illuminate\Support\Number::currency($this->getMaxLoanAmount()) }}</flux:text>
             </div>
 
             <div>
@@ -192,15 +193,15 @@ new #[Title('Apply for Loan')] class extends Component {
                     </div>
                     <div>
                         <flux:text color="secondary">Monthly Payment:</flux:text>
-                        <flux:text weight="medium" color="success">${{ number_format($this->monthlyPayment, 2) }}</flux:text>
+                        <flux:text weight="medium" color="success">{{ \Illuminate\Support\Number::currency($this->monthlyPayment) }}</flux:text>
                     </div>
                     <div>
                         <flux:text color="secondary">Total Repayment:</flux:text>
-                        <flux:text weight="medium" color="primary">${{ number_format($this->totalRepayment, 2) }}</flux:text>
+                        <flux:text weight="medium" color="primary">{{ \Illuminate\Support\Number::currency($this->totalRepayment) }}</flux:text>
                     </div>
                     <div>
                         <flux:text color="secondary">Total Interest:</flux:text>
-                        <flux:text weight="medium" color="warning">${{ number_format($this->totalRepayment - floatval($this->amount), 2) }}</flux:text>
+                        <flux:text weight="medium" color="warning">{{ \Illuminate\Support\Number::currency($this->totalRepayment - floatval($this->amount)) }}</flux:text>
                     </div>
                 </div>
             </flux:callout>

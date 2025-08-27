@@ -59,6 +59,7 @@ new class extends Component {
     <flux:heading size="xl">API Settings</flux:heading>
     <flux:subheading>Manage API configurations and credentials</flux:subheading>
 
+
     <form wire:submit="save" class="mt-6 space-y-6 max-w-2xl">
         <!-- Add New Configuration -->
         <flux:card>

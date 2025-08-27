@@ -2,6 +2,7 @@
 
 namespace App\Events\Loan;
 
+use App\Models\Loan; // Import the Loan model
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -14,7 +15,10 @@ class LoanApproved extends LoanEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-
+    public function __construct(Loan $loan)
+    {
+        parent::__construct($loan);
+    }
 
     /**
      * Get the channels the event should broadcast on.
@@ -24,7 +28,7 @@ class LoanApproved extends LoanEvent
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new PrivateChannel('loan.' . $this->loan->id),
         ];
     }
 }

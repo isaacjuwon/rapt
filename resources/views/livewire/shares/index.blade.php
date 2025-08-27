@@ -6,6 +6,8 @@ use Livewire\Volt\Component;
 use Masmerise\Toaster\Toaster;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Auth;
+use App\Events\Share\SharePurchased;
+use App\Events\Share\ShareSaleRequested;
 
 new class extends Component {
     public int $buyQuantity = 1;
@@ -15,7 +17,9 @@ new class extends Component {
     {
         try {
             $user = auth()->user();
-            $user->buyShares($this->buyQuantity);
+            $shareTransaction = $user->buyShares($this->buyQuantity);
+
+            event(new SharePurchased($shareTransaction));
 
             Toaster::success("Successfully purchased {$this->buyQuantity} shares!");
             $this->buyQuantity = 1;
@@ -28,7 +32,9 @@ new class extends Component {
     {
         try {
             $user = auth()->user();
-            $user->sellShares($this->sellQuantity);
+            $shareTransaction = $user->sellShares($this->sellQuantity);
+
+            event(new ShareSaleRequested($shareTransaction));
 
             Toaster::success("Share sale request submitted for admin approval!");
             $this->sellQuantity = 1;
@@ -84,45 +90,50 @@ new class extends Component {
     }
 }; ?>
 
-<div class="space-y-6">
-    <!-- Share Info -->
+<div class="space-y-6" wire:loading.class="opacity-50">
+    <!-- Share Overview -->
     <flux:card>
-        <flux:heading>Website Shares</flux:heading>
+        <flux:heading size="lg">Share Overview</flux:heading>
 
-        @if ($this->shareInfo)
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="text-center">
-                <div class="text-2xl font-bold">${{ number_format($this->shareInfo->price_per_share, 2) }}</div>
-                <div class="text-sm text-gray-500">Price per Share</div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Website Shares Info -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Website Shares</h3>
+                @if ($this->shareInfo)
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">${{ number_format($this->shareInfo->price_per_share, 2) }}</div>
+                        <div class="text-sm text-gray-500">Price per Share</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">{{ $this->shareInfo->available_shares }}</div>
+                        <div class="text-sm text-gray-500">Available Shares</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">{{ $this->shareInfo->total_shares }}</div>
+                        <div class="text-sm text-gray-500">Total Shares</div>
+                    </div>
+                </div>
+                @else
+                <div class="text-center text-gray-500">
+                    No shares available for purchase
+                </div>
+                @endif
             </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold">{{ $this->shareInfo->available_shares }}</div>
-                <div class="text-sm text-gray-500">Available Shares</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold">{{ $this->shareInfo->total_shares }}</div>
-                <div class="text-sm text-gray-500">Total Shares</div>
-            </div>
-        </div>
-        @else
-        <div class="text-center text-gray-500">
-            No shares available for purchase
-        </div>
-        @endif
-    </flux:card>
 
-    <!-- Your Shares -->
-    <flux:card>
-        <flux:heading>Your Shares</flux:heading>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="text-center">
-                <div class="text-2xl font-bold">{{ $this->userShares() }}</div>
-                <div class="text-sm text-gray-500">Shares Owned</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold">${{ number_format($this->shareValue(), 2) }}</div>
-                <div class="text-sm text-gray-500">Current Value</div>
+            <!-- Your Shares Info -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Your Shares</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">{{ $this->userShares() }}</div>
+                        <div class="text-sm text-gray-500">Shares Owned</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold">${{ number_format($this->shareValue(), 2) }}</div>
+                        <div class="text-sm text-gray-500">Current Value</div>
+                    </div>
+                </div>
             </div>
         </div>
     </flux:card>
@@ -131,7 +142,7 @@ new class extends Component {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Buy Shares -->
         <flux:card>
-            <flux:heading>Buy Shares</flux:heading>
+            <flux:heading size="lg">Buy Shares</flux:heading>
 
             <div class="space-y-4">
                 <flux:input
@@ -148,6 +159,8 @@ new class extends Component {
                 <flux:button
                     wire:click="buyShares"
                     :disabled="!$this->canBuyShares()"
+                    wire:loading.attr="disabled"
+                    wire:target="buyShares"
                     class="w-full">
                     Buy Shares
                 </flux:button>
@@ -156,7 +169,7 @@ new class extends Component {
 
         <!-- Sell Shares -->
         <flux:card>
-            <flux:heading>Sell Shares</flux:heading>
+            <flux:heading size="lg">Sell Shares</flux:heading>
 
             <div class="space-y-4">
                 <flux:input
@@ -174,6 +187,8 @@ new class extends Component {
                 <flux:button
                     wire:click="sellShares"
                     :disabled="!$this->canSellShares()"
+                    wire:loading.attr="disabled"
+                    wire:target="sellShares"
                     variant="danger"
                     class="w-full">
                     Sell Shares
@@ -228,22 +243,22 @@ new class extends Component {
 
     <!-- Recent Transactions -->
     <flux:card>
-        <flux:heading>Recent Transactions</flux:heading>
+        <flux:heading size="lg">Recent Transactions</flux:heading>
 
         @if ($this->recentTransactions->count() > 0)
         <div class="space-y-2">
             @foreach ($this->recentTransactions as $transaction)
-            <div class="flex justify-between items-center py-2 border-b">
-                <div>
+            <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                <div class="flex flex-col">
                     <span class="font-semibold {{ $transaction->type === 'buy' ? 'text-green-600' : 'text-red-600' }}">
                         {{ strtoupper($transaction->type) }}
                         @if ($transaction->status === 'pending')
-                        <span class="text-yellow-600 text-xs">(Pending)</span>
+                        <span class="ml-2 px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Pending</span>
                         @endif
                     </span>
-                    <div class="text-sm text-gray-500">
+                    <span class="text-sm text-gray-500">
                         {{ $transaction->created_at->format('M j, Y g:i A') }}
-                    </div>
+                    </span>
                 </div>
                 <div class="text-right">
                     <div class="font-semibold">
@@ -251,12 +266,12 @@ new class extends Component {
                     </div>
                     <div class="text-sm text-gray-500">
                         @if ($transaction->type === 'buy')
-                        -${{ number_format($transaction->total_amount, 2) }}
+                        <span class="text-red-600">-${{ number_format($transaction->total_amount, 2) }}</span>
                         @else
                         @if ($transaction->status === 'pending')
-                        Pending: ${{ number_format($transaction->total_amount, 2) }}
+                        <span class="text-yellow-600">Pending: ${{ number_format($transaction->total_amount, 2) }}</span>
                         @else
-                        +${{ number_format($transaction->total_amount, 2) }}
+                        <span class="text-green-600">+${{ number_format($transaction->total_amount, 2) }}</span>
                         @endif
                         @endif
                     </div>

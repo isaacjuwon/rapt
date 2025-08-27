@@ -1,6 +1,7 @@
 <?php
 
 use Flux\Flux;
+use Masmerise\Toaster\Toaster;
 use App\Models\Transaction;
 use Illuminate\View\View;
 use Livewire\Attributes\Url;
@@ -26,9 +27,9 @@ new #[Title('Manage Transactions')] class extends Component {
     #[Url('dir', keep: true)]
     public string $sortDirection = 'desc';
 
-    public string $type = '';
+    public ?string $type = null;
 
-    public string $status = '';
+    public ?string $status = null;
 
     public ?Transaction $selected_transaction = null;
 
@@ -131,7 +132,13 @@ new #[Title('Manage Transactions')] class extends Component {
         }
         $this->modal('delete-transaction')->close();
 
-        Flux::toast(variant: 'success', text: __('Transaction deleted successfully.'));
+        Toaster::success(__('Transaction deleted successfully.'));
+    }
+
+    #[On('open-transaction-details')]
+    public function showTransactionDetails(int $transactionId): void
+    {
+        $this->selected_transaction = Transaction::find($transactionId);
     }
 }; ?>
 
@@ -261,7 +268,7 @@ new #[Title('Manage Transactions')] class extends Component {
                     </flux:table.cell>
 
                     <flux:table.cell class="whitespace-nowrap">
-                        <span class="font-medium">{{ number_format($transaction->amount, 2) }}</span>
+                        <span class="font-medium">{{ \Illuminate\Support\Number::currency($transaction->amount) }}</span>
                     </flux:table.cell>
 
                     <flux:table.cell class="whitespace-nowrap">
@@ -339,59 +346,59 @@ new #[Title('Manage Transactions')] class extends Component {
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <flux:label>{{ __('Reference') }}</flux:label>
-                    <flux:text>{{ $transaction->reference ?? 'N/A' }}</flux:text>
+                    <flux:text>{{ $this->selected_transaction?->reference ?? 'N/A' }}</flux:text>
                 </div>
 
                 <div>
                     <flux:label>{{ __('Amount') }}</flux:label>
-                    <flux:text>{{ number_format($transaction->amount, 2) }}</flux:text>
+                    <flux:text>{{ $this->selected_transaction?->amount ? \Illuminate\Support\Number::currency($this->selected_transaction?->amount) : 'N/A' }}</flux:text>
                 </div>
 
                 <div>
                     <flux:label>{{ __('Type') }}</flux:label>
-                    <flux:badge variant="outline">{{ ucfirst($transaction->type->value) }}</flux:badge>
+                    <flux:badge variant="outline">{{ ucfirst($this->selected_transaction?->type->value) }}</flux:badge>
                 </div>
 
                 <div>
                     <flux:label>{{ __('Status') }}</flux:label>
-                    <flux:badge :variant="$transaction->status->getColor()">{{ ucfirst($transaction->status->value) }}</flux:badge>
+                    <flux:badge :variant="$this->selected_transaction?->status->getColor()">{{ ucfirst($this->selected_transaction?->status->value) }}</flux:badge>
                 </div>
 
                 <div>
                     <flux:label>{{ __('User') }}</flux:label>
-                    <flux:text>{{ $transaction->user->name ?? 'N/A' }}</flux:text>
+                    <flux:text>{{ $this->selected_transaction?->user->name ?? 'N/A' }}</flux:text>
                 </div>
 
                 <div>
                     <flux:label>{{ __('Payment Method') }}</flux:label>
-                    <flux:text>{{ $transaction->payment_method ?? 'N/A' }}</flux:text>
+                    <flux:text>{{ $this->selected_transaction?->payment_method ?? 'N/A' }}</flux:text>
                 </div>
 
                 <div>
                     <flux:label>{{ __('Recipient') }}</flux:label>
-                    <flux:text>{{ $transaction->recipient ?? 'N/A' }}</flux:text>
+                    <flux:text>{{ $this->selected_transaction?->recipient ?? 'N/A' }}</flux:text>
                 </div>
 
                 <div class="sm:col-span-2">
                     <flux:label>{{ __('Description') }}</flux:label>
-                    <flux:text>{{ $transaction->description ?? 'No description available' }}</flux:text>
+                    <flux:text>{{ $this->selected_transaction?->description ?? 'No description available' }}</flux:text>
                 </div>
 
                 <div>
                     <flux:label>{{ __('Created At') }}</flux:label>
-                    <flux:text>{{ $transaction->created_at->format('M d, Y h:i A') }}</flux:text>
+                    <flux:text>{{ $this->selected_transaction?->created_at->format('M d, Y h:i A') }}</flux:text>
                 </div>
 
                 <div>
                     <flux:label>{{ __('Updated At') }}</flux:label>
-                    <flux:text>{{ $transaction->updated_at->format('M d, Y h:i A') }}</flux:text>
+                    <flux:text>{{ $this->selected_transaction?->updated_at->format('M d, Y h:i A') }}</flux:text>
                 </div>
             </div>
 
-            @if($transaction->response)
+            @if($this->selected_transaction?->response)
             <div>
                 <flux:label>{{ __('Response') }}</flux:label>
-                <flux:text class="text-sm">{{ $transaction->response }}</flux:text>
+                <flux:text class="text-sm">{{ $this->selected_transaction?->response }}</flux:text>
             </div>
             @endif
         </div>
@@ -426,7 +433,7 @@ new #[Title('Manage Transactions')] class extends Component {
 @script
 <script>
     $wire.on('open-transaction-details', (transactionId) => {
-        // You can load transaction details here if needed
+        $wire.call('showTransactionDetails', transactionId); // Call the Livewire method
         $wire.dispatch('open-modal', 'transaction-details');
     });
 </script>

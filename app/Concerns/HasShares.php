@@ -10,9 +10,14 @@ use Illuminate\Support\Str;
 use App\Models\ShareTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Collection;
 
 trait HasShares
 {
+    /**
+     * Manages user's share holdings and transactions.
+     */
+
     /**
      * Get user's share holdings
      */
@@ -55,6 +60,11 @@ trait HasShares
      */
     public function buyShares(int $quantity): ShareTransaction
     {
+        $settings = app(\App\Settings\SharesSettings::class);
+        if (!$settings->shares_enabled) {
+            throw new \RuntimeException('Shares are currently disabled.');
+        }
+
         if ($quantity <= 0) {
             throw new \InvalidArgumentException('Quantity must be greater than zero');
         }
@@ -62,6 +72,16 @@ trait HasShares
         $share = Share::first();
         if (!$share) {
             throw new \RuntimeException('No shares available for purchase');
+        }
+
+        $totalCost = $quantity * $share->price_per_share;
+
+        if ($totalCost < $settings->minimum_share_amount) {
+            throw new \InvalidArgumentException('Purchase amount is below the minimum limit.');
+        }
+
+        if ($totalCost > $settings->maximum_share_amount) {
+            throw new \InvalidArgumentException('Purchase amount is above the maximum limit.');
         }
 
         if ($share->available_shares < $quantity) {
@@ -77,7 +97,7 @@ trait HasShares
 
         return DB::transaction(function () use ($share, $quantity, $totalCost) {
             // Debit user's wallet
-            //   $this->debitWallet($totalCost, "Purchase of {$quantity} shares");
+            $this->debitWallet($totalCost, "Purchase of {$quantity} shares");
 
             // Update or create user share record
             $userShare = $this->userShares()->first();
@@ -108,7 +128,7 @@ trait HasShares
                 'total_amount' => $totalCost,
                 'net_amount' => $totalCost, // Assuming no fees for simplicity
                 'transaction_id' => Str::random(6),
-                'wallet_id' => 1
+                'wallet_id' => $this->mainWallet->id
 
             ]);
 
@@ -121,6 +141,11 @@ trait HasShares
      */
     public function sellShares(int $quantity): ShareTransaction
     {
+        $settings = app(\App\Settings\SharesSettings::class);
+        if (!$settings->shares_enabled) {
+            throw new \RuntimeException('Shares are currently disabled.');
+        }
+
         if ($quantity <= 0) {
             throw new \InvalidArgumentException('Quantity must be greater than zero');
         }
@@ -282,5 +307,16 @@ trait HasShares
     public function getTotalSharesAttribute(): int
     {
         return $this->getTotalShares();
+    }
+
+    /**
+     * Get the share ownership percentage for the user.
+     */
+    public function getShareOwnershipPercentage(): float
+    {
+        $totalShares = Share::sum('value');
+        $userShares = $this->getShareValue();
+
+        return $totalShares > 0 ? ($userShares / $totalShares) * 100 : 0;
     }
 }

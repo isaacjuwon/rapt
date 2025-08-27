@@ -110,7 +110,7 @@ new #[Layout('components.layouts.admin')] #[Title('Dashboard')] class extends Co
         <flux:card class="p-6 lg:col-span-2">
             <flux:heading size="md" class="mb-4">Monthly Revenue</flux:heading>
             <div class="flex items-baseline gap-2">
-                <flux:heading size="xl">₦{{ number_format($this->stats['monthlyRevenue'], 2) }}</flux:heading>
+                <flux:heading size="xl">{{ \Illuminate\Support\Number::currency($this->stats['monthlyRevenue']) }}</flux:heading>
                 <flux:text class="text-sm text-green-500">+12.5% from last month</flux:text>
             </div>
 
@@ -128,7 +128,7 @@ new #[Layout('components.layouts.admin')] #[Title('Dashboard')] class extends Co
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
                     <flux:text class="text-sm">Wallet Balance</flux:text>
-                    <flux:text class="font-medium">₦{{ number_format($this->stats['totalWalletBalance'], 2) }}</flux:text>
+                    <flux:text class="font-medium">{{ \Illuminate\Support\Number::currency($this->stats['totalWalletBalance']) }}</flux:text>
                 </div>
                 <div class="flex items-center justify-between">
                     <flux:text class="text-sm">Pending Loans</flux:text>
@@ -168,7 +168,7 @@ new #[Layout('components.layouts.admin')] #[Title('Dashboard')] class extends Co
                     </div>
                 </div>
                 <div class="text-right">
-                    <flux:text class="font-medium">₦{{ number_format($transaction->amount, 2) }}</flux:text>
+                    <flux:text class="font-medium">{{ \Illuminate\Support\Number::currency($transaction->amount) }}</flux:text>
                     <flux:badge :variant="$transaction->status->getColor()" size="sm">
                         {{ ucfirst($transaction->status->value) }}
                     </flux:badge>

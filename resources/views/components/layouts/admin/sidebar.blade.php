@@ -20,10 +20,16 @@
 
             <flux:navlist.group :heading="__('Resources')" class="grid">
                 <flux:navlist.item icon="phone" :href="route('admin.airtime.index')" :current="request()->routeIs('admin.airtime.index')" wire:navigate>{{ __('Airtime') }}</flux:navlist.item>
+                <flux:navlist.item icon="wifi" :href="route('admin.data.index')" :current="request()->routeIs('admin.data.index')" wire:navigate>{{ __('Data Plans') }}</flux:navlist.item>
+                <flux:navlist.item icon="tv" :href="route('admin.cable.index')" :current="request()->routeIs('admin.cable.index')" wire:navigate>{{ __('Cable Plans') }}</flux:navlist.item>
+                <flux:navlist.item icon="academic-cap" :href="route('admin.education.index')" :current="request()->routeIs('admin.education.index')" wire:navigate>{{ __('Education Plans') }}</flux:navlist.item>
+                <flux:navlist.item icon="bolt" :href="route('admin.electricity.index')" :current="request()->routeIs('admin.electricity.index')" wire:navigate>{{ __('Electricity Plans') }}</flux:navlist.item>
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Management')" class="grid">
                 <flux:navlist.item icon="users" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.index')" wire:navigate>{{ __('Users') }}</flux:navlist.item>
+                <flux:navlist.item icon="key" :href="route('admin.permissions.index')" :current="request()->routeIs('admin.permissions.index')" wire:navigate>{{ __('Permissions') }}</flux:navlist.item>
+                <flux:navlist.item icon="user-group" :href="route('admin.roles.index')" :current="request()->routeIs('admin.roles.index')" wire:navigate>{{ __('Roles') }}</flux:navlist.item>
                 <flux:navlist.item icon="tag" :href="route('admin.brands.index')" :current="request()->routeIs('admin.brands.index')" wire:navigate>{{ __('Brands') }}</flux:navlist.item>
                 <flux:navlist.item icon="currency-dollar" :href="route('admin.shares.index')" :current="request()->routeIs('admin.shares.index')" wire:navigate>{{ __('Shares') }}</flux:navlist.item>
                 <flux:navlist.item icon="document-text" :href="route('admin.transactions.index')" :current="request()->routeIs('admin.transactions.index')" wire:navigate>{{ __('Transactions') }}</flux:navlist.item>

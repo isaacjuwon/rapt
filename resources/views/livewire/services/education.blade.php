@@ -81,7 +81,7 @@ new class extends Component {
             :disabled="!$operator_id">
             <option value="">{{ __('Select education plan') }}</option>
             @foreach ($this->plans as $plan)
-            <option value="{{ $plan->id }}">{{ $plan->name }} ({{ number_format($plan->price, 2) }})</option>
+            <option value="{{ $plan->id }}">{{ $plan->name }} ({{ \Illuminate\Support\Number::currency($plan->price) }})</option>
             @endforeach
         </flux:select>
 
@@ -128,7 +128,7 @@ new class extends Component {
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Amount:</span>
-                            <span class="font-semibold">{{ number_format($plan->price, 2) }}</span>
+                            <span class="font-semibold">{{ \Illuminate\Support\Number::currency($plan->price) }}</span>
                         </div>
                         @endisset
                         <div class="flex justify-between">

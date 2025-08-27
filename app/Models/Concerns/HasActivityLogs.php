@@ -7,7 +7,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 trait HasActivityLogs
 {
-    use LogsActivity;
+    // use LogsActivity;
 
     public function getActivitylogOptions(): LogOptions
     {

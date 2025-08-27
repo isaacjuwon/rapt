@@ -2,6 +2,7 @@
 
 namespace App\Events\Loan;
 
+use App\Models\Loan; // Import the Loan model
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -17,20 +18,19 @@ class LoanEvent
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(public Loan $loan) // Accept a Loan model
     {
         //
     }
 
     /**
      * Get the channels the event should broadcast on.
-     *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new PrivateChannel('loan.' . $this->loan->id), // Dynamic channel name
         ];
     }
 }

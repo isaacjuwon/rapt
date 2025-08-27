@@ -1,6 +1,7 @@
 <?php
 
 use Flux\Flux;
+use Masmerise\Toaster\Toaster;
 use App\Models\Brand;
 use App\Models\AirtimePlan;
 use Livewire\Attributes\On;
@@ -57,7 +58,7 @@ new  #[Layout('layouts.components.admin')] class extends Component {
         ]);
 
         if ($this->name === $this->plan->name && $this->description === $this->plan->description) {
-            Flux::toast(variant: 'info', text: __('Nothing changed.'));
+            Toaster::info(__('Nothing changed.'));
 
             return;
         }
@@ -72,7 +73,7 @@ new  #[Layout('layouts.components.admin')] class extends Component {
         $this->resetValues();
         $this->modal('edit-airtimePlan')->close();
 
-        Flux::toast(variant: 'success', text: __('AirtimePlan updated successfully.'));
+        Toaster::success(__('AirtimePlan updated successfully.'));
     }
 
 

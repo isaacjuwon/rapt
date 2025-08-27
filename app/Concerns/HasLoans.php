@@ -7,91 +7,72 @@ namespace App\Concerns;
 use App\Models\Loan;
 use App\Models\Share;
 use App\Settings\LoanSettings;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait HasLoans
 {
-    public function loans()
+    /**
+     * Get the loans for the user.
+     */
+    public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
     }
 
-    public function activeLoans()
+    /**
+     * Get the active loans for the user.
+     */
+    public function activeLoans(): Builder
     {
         return $this->loans()->active();
     }
 
-    public function pendingLoans()
+    /**
+     * Get the pending loans for the user.
+     */
+    public function pendingLoans(): Builder
     {
         return $this->loans()->pending();
     }
 
-    public function completedLoans()
+    /**
+     * Get the completed loans for the user.
+     */
+    public function completedLoans(): Builder
     {
         return $this->loans()->completed();
     }
 
-    public function getLoanHistory(): array
+    /**
+     * Get the loan history for the user.
+     */
+    public function getLoanHistory(): Collection
     {
         return $this->loans()
             ->orderByDesc('created_at')
-            ->get()
-            ->map(fn($loan) => [
-                'id' => $loan->id,
-                'loan_number' => $loan->loan_number,
-                'principal_amount' => $loan->principal_amount,
-                'interest_rate' => $loan->interest_rate,
-                'total_payable' => $loan->total_payable,
-                'total_paid' => $loan->total_paid,
-                'remaining_balance' => $loan->remaining_balance,
-                'term_months' => $loan->term_months,
-                'status' => $loan->status,
-                'status_label' => $loan->getStatusLabel(),
-                'loan_type' => $loan->loan_type,
-                'loan_type_label' => $loan->getTypeLabel(),
-                'purpose' => $loan->purpose,
-                'disbursement_date' => $loan->disbursement_date?->format('Y-m-d'),
-                'first_payment_date' => $loan->first_payment_date?->format('Y-m-d'),
-                'expected_end_date' => $loan->expected_end_date?->format('Y-m-d'),
-                'payment_frequency' => $loan->payment_frequency,
-                'progress_percentage' => $loan->getProgressPercentage(),
-                'created_at' => $loan->created_at->format('Y-m-d H:i:s'),
-                'updated_at' => $loan->updated_at->format('Y-m-d H:i:s'),
-            ])
-            ->toArray();
+            ->get();
     }
 
-    public function getActiveLoans(): array
+    /**
+     * Get the active loans for the user.
+     */
+    public function getActiveLoans(): Collection
     {
         return $this->activeLoans()
             ->orderByDesc('created_at')
-            ->get()
-            ->map(fn($loan) => [
-                'id' => $loan->id,
-                'loan_number' => $loan->loan_number,
-                'principal_amount' => $loan->principal_amount,
-                'interest_rate' => $loan->interest_rate,
-                'total_payable' => $loan->total_payable,
-                'total_paid' => $loan->total_paid,
-                'remaining_balance' => $loan->remaining_balance,
-                'term_months' => $loan->term_months,
-                'installment_amount' => $loan->calculateInstallmentAmount(),
-                'status' => $loan->status,
-                'status_label' => $loan->getStatusLabel(),
-                'loan_type' => $loan->loan_type,
-                'loan_type_label' => $loan->getTypeLabel(),
-                'purpose' => $loan->purpose,
-                'disbursement_date' => $loan->disbursement_date?->format('Y-m-d'),
-                'next_payment_date' => $loan->getNextPaymentDueDate()?->format('Y-m-d'),
-                'overdue_amount' => $loan->getOverdueAmount(),
-                'progress_percentage' => $loan->getProgressPercentage(),
-            ])
-            ->toArray();
+            ->get();
     }
 
+    /**
+     * Get loan eligibility details for the user.
+     */
     public function getLoanEligibilityDetails(): array
     {
         $settings = app(LoanSettings::class);
-        $totalShareValue = $this->getTotalShareValue();
+        $totalShareValue = $this->getShareValue();
         $hasDefaultedLoans = $this->hasDefaultedLoans();
         $hasActiveLoans = $this->activeLoans()->exists();
         $shareOwnershipPercentage = $this->getShareOwnershipPercentage();
@@ -121,54 +102,69 @@ trait HasLoans
         ];
     }
 
+    /**
+     * Check if the user has defaulted loans.
+     */
     public function hasDefaultedLoans(): bool
     {
         return $this->loans()->where('status', Loan::STATUS_DEFAULTED)->exists();
     }
 
-    public function getTotalShareValue(): float
-    {
-        return $this->getShareValue();
-    }
-
-    public function getShareOwnershipPercentage(): float
-    {
-        $totalShares = Share::sum('value');
-        $userShares = $this->getTotalShareValue();
-
-        return $totalShares > 0 ? ($userShares / $totalShares) * 100 : 0;
-    }
-
+    /**
+     * Check 30% share requirement for loan amount.
+     */
     public function check30PercentShareRequirement(float $loanAmount): bool
     {
         $settings = app(LoanSettings::class);
 
         return !$settings->shares_requirement_enabled ||
-            $this->getTotalShareValue() >= ($loanAmount * 0.30); // 30% requirement
+            $this->getShareValue() >= ($loanAmount * ($settings->shares_requirement_percentage / 100));
     }
 
+    /**
+     * Calculate simple interest.
+     */
     public function calculateSimpleInterest(float $principal, float $rate, int $termMonths): float
     {
         return $principal * ($rate / 100) * ($termMonths / 12);
     }
 
+    /**
+     * Apply for a loan.
+     */
     public function applyForLoan(float $amount, int $termMonths, string $purpose, string $loanType = 'personal'): Loan
     {
         $settings = app(LoanSettings::class);
 
         if (!$settings->loans_enabled) {
-            throw new \Exception('Loan applications are currently disabled.');
+            throw ValidationException::withMessages([
+                'loan_application' => ['Loan applications are currently disabled.'],
+            ]);
         }
 
         // Validate loan limits
         match (true) {
-            $amount < $settings->minimum_loan_amount => throw new \Exception("Minimum loan amount is {$settings->minimum_loan_amount}."),
-            $amount > $settings->maximum_loan_amount => throw new \Exception("Maximum loan amount is {$settings->maximum_loan_amount}."),
-            $termMonths < $settings->minimum_loan_term_months => throw new \Exception("Minimum loan term is {$settings->minimum_loan_term_months} months."),
-            $termMonths > $settings->maximum_loan_term_months => throw new \Exception("Maximum loan term is {$settings->maximum_loan_term_months} months."),
-            !$this->check30PercentShareRequirement($amount) => throw new \Exception('You do not meet the share ownership requirement for this loan amount.'),
-            $settings->require_no_defaulted_loans && $this->hasDefaultedLoans() => throw new \Exception('You cannot apply for a new loan while having defaulted loans.'),
-            !$settings->allow_multiple_active_loans && $this->activeLoans()->exists() => throw new \Exception('You cannot have multiple active loans.'),
+            $amount < $settings->minimum_loan_amount => throw ValidationException::withMessages([
+                'amount' => ["Minimum loan amount is {$settings->minimum_loan_amount}."]
+            ]),
+            $amount > $settings->maximum_loan_amount => throw ValidationException::withMessages([
+                'amount' => ["Maximum loan amount is {$settings->maximum_loan_amount}."]
+            ]),
+            $termMonths < $settings->minimum_loan_term_months => throw ValidationException::withMessages([
+                'term_months' => ["Minimum loan term is {$settings->minimum_loan_term_months} months."]
+            ]),
+            $termMonths > $settings->maximum_loan_term_months => throw ValidationException::withMessages([
+                'term_months' => ["Maximum loan term is {$settings->maximum_loan_term_months} months."]
+            ]),
+            !$this->check30PercentShareRequirement($amount) => throw ValidationException::withMessages([
+                'shares' => ['You do not meet the share ownership requirement for this loan amount.']
+            ]),
+            $settings->require_no_defaulted_loans && $this->hasDefaultedLoans() => throw ValidationException::withMessages([
+                'loans' => ['You cannot apply for a new loan while having defaulted loans.']
+            ]),
+            !$settings->allow_multiple_active_loans && $this->activeLoans()->exists() => throw ValidationException::withMessages([
+                'loans' => ['You cannot have multiple active loans.']
+            ]),
             default => null,
         };
 
@@ -197,21 +193,33 @@ trait HasLoans
         ]);
     }
 
+    /**
+     * Get the total amount borrowed by the user.
+     */
     public function getTotalAmountBorrowed(): float
     {
         return $this->loans()->sum('principal_amount');
     }
 
+    /**
+     * Get the total amount repaid by the user.
+     */
     public function getTotalAmountRepaid(): float
     {
         return $this->loans()->sum('total_paid');
     }
 
+    /**
+     * Get the total outstanding balance for the user.
+     */
     public function getTotalOutstandingBalance(): float
     {
         return $this->loans()->sum('remaining_balance');
     }
 
+    /**
+     * Get loan statistics for the user.
+     */
     public function getLoanStatistics(): array
     {
         $totalBorrowed = $this->getTotalAmountBorrowed();

@@ -95,7 +95,7 @@ new #[Title('Loan Details')] class extends Component {
             <div class="space-y-3 mt-4">
                 <div class="flex justify-between">
                     <flux:text color="secondary">Principal Amount:</flux:text>
-                    <flux:text weight="semibold">${{ number_format($loan->principal_amount, 2) }}</flux:text>
+                    <flux:text weight="semibold">{{ \Illuminate\Support\Number::currency($loan->principal_amount) }}</flux:text>
                 </div>
                 <div class="flex justify-between">
                     <flux:text color="secondary">Interest Rate:</flux:text>
@@ -103,19 +103,19 @@ new #[Title('Loan Details')] class extends Component {
                 </div>
                 <div class="flex justify-between">
                     <flux:text color="secondary">Total Payable:</flux:text>
-                    <flux:text weight="semibold">${{ number_format($loan->total_payable, 2) }}</flux:text>
+                    <flux:text weight="semibold">{{ \Illuminate\Support\Number::currency($loan->total_payable) }}</flux:text>
                 </div>
                 <div class="flex justify-between">
                     <flux:text color="secondary">Total Paid:</flux:text>
-                    <flux:text weight="semibold" color="success">${{ number_format($loan->total_paid, 2) }}</flux:text>
+                    <flux:text weight="semibold" color="success">{{ \Illuminate\Support\Number::currency($loan->total_paid) }}</flux:text>
                 </div>
                 <div class="flex justify-between">
                     <flux:text color="secondary">Remaining Balance:</flux:text>
-                    <flux:text weight="semibold" color="warning">${{ number_format($loan->remaining_balance, 2) }}</flux:text>
+                    <flux:text weight="semibold" color="warning">{{ \Illuminate\Support\Number::currency($loan->remaining_balance) }}</flux:text>
                 </div>
                 <div class="flex justify-between">
                     <flux:text color="secondary">Monthly Installment:</flux:text>
-                    <flux:text weight="semibold">${{ number_format($loan->calculateInstallmentAmount(), 2) }}</flux:text>
+                    <flux:text weight="semibold">{{ \Illuminate\Support\Number::currency($loan->calculateInstallmentAmount()) }}</flux:text>
                 </div>
             </div>
         </flux:card>
@@ -169,11 +169,11 @@ new #[Title('Loan Details')] class extends Component {
                     <flux:text weight="medium">Installments Paid</flux:text>
                 </div>
                 <div>
-                    <flux:text color="success">${{ number_format($loan->total_paid, 2) }}</flux:text>
+                    <flux:text color="success">{{ \Illuminate\Support\Number::currency($loan->total_paid) }}</flux:text>
                     <flux:text weight="medium">Amount Paid</flux:text>
                 </div>
                 <div>
-                    <flux:text color="warning">${{ number_format($loan->remaining_balance, 2) }}</flux:text>
+                    <flux:text color="warning">{{ \Illuminate\Support\Number::currency($loan->remaining_balance) }}</flux:text>
                     <flux:text weight="medium">Remaining</flux:text>
                 </div>
             </div>
@@ -197,7 +197,7 @@ new #[Title('Loan Details')] class extends Component {
                 <flux:table.row>
                     <flux:table.cell>{{ $payment->installment_number }}</flux:table.cell>
                     <flux:table.cell>{{ $payment->due_date->format('M d, Y') }}</flux:table.cell>
-                    <flux:table.cell>${{ number_format($payment->amount, 2) }}</flux:table.cell>
+                    <flux:table.cell>{{ \Illuminate\Support\Number::currency($payment->amount) }}</flux:table.cell>
                     <flux:table.cell>
                         <flux:badge variant="{{ $this->paymentStatus($payment) }}">
                             {{ $this->paymentStatusLabel($payment) }}

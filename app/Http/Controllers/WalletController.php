@@ -36,8 +36,8 @@ class WalletController extends Controller
             $result = $this->paymentAction->verifyPaymentAndFundWallet($reference);
 
             if ($result['success']) {
-                return redirect()->route('wallet.index')
-                    ->with('success', "Wallet funded successfully! ₦" . number_format($result['amount'], 2) . " has been added to your {$result['wallet_type']} wallet.");
+                                return redirect()->route('wallet.index')
+                    ->with('success', "Wallet funded successfully! " . \Illuminate\Support\Number::currency($result['amount']) . " has been added to your {$result['wallet_type']} wallet.");
             } else {
                 return redirect()->route('wallet.fund')
                     ->with('error', $result['message']);

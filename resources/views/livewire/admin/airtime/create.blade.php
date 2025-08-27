@@ -1,6 +1,7 @@
 <?php
 
 use Flux\Flux;
+use Masmerise\Toaster\Toaster;
 use App\Models\Brand;
 use App\Models\AirtimePlan;
 use Livewire\Volt\Component;
@@ -54,7 +55,7 @@ new #[Layout('layouts.components.admin')] class extends Component {
         $this->resetPage();
         $this->modal('create-airtimePlan')->close();
 
-        Flux::toast(variant: 'success', text: __('Airtime Plan created successfully.'));
+        Toaster::success(__('Airtime Plan created successfully.'));
     }
 }; ?>
 

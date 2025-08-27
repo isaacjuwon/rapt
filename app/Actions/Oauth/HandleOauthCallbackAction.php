@@ -19,7 +19,7 @@ use App\Jobs\User\UpdateUserProfileInformationJob;
 
 final readonly class HandleOauthCallbackAction
 {
-    use AsFakeAction;
+    //use AsFakeAction;
 
     public function handle(string $provider, SocialiteUser $socialiteUser, ?User $authenticatedUser = null): User
     {

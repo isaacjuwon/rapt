@@ -16,6 +16,8 @@ class GeneralSettings extends Settings
     public string $timezone = 'Africa/Lagos';
     public bool $maintenance_mode = false;
     public bool $registration_enabled = true;
+    public ?string $site_logo;
+    public ?string $favicon;
 
     public static function group(): string
     {

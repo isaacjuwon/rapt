@@ -16,6 +16,7 @@ class Account extends Model
         'bank_name',
         'bank_number',
         'user_id',
+        'paystack_customer_code',
     ];
 
     protected $casts = [

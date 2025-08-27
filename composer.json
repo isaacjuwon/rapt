@@ -11,16 +11,19 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
+        "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.1.1",
         "livewire/volt": "^1.7.0",
         "masmerise/livewire-toaster": "^2.8",
         "spatie/laravel-medialibrary": "^11.14",
+        "spatie/laravel-permission": "^6.21",
         "spatie/laravel-settings": "^3.4",
         "sprout/sprout": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "laravel/boost": "^1.0",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.18",
         "laravel/sail": "^1.41",

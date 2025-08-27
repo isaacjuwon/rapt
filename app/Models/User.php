@@ -7,6 +7,7 @@ use App\Concerns\HasLoans;
 use App\Concerns\HasShares;
 use App\Concerns\Wallet\HasWallet;
 use App\Concerns\Wallet\HandlesDeposit;
+use App\Concerns\Verifiable;
 use App\Enums\WalletType;
 use Illuminate\Support\Str;
 use Illuminate\Notifications\Notifiable;
@@ -23,6 +24,7 @@ class User extends Authenticatable
     use HasShares;
     use HasWallet;
     use HandlesDeposit;
+    use Verifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -32,7 +34,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
+        'first_name',
+        'last_name',
+        'is_verified',
     ];
 
     /**
@@ -55,6 +61,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_verified' => 'boolean',
         ];
     }
 
@@ -77,6 +84,35 @@ class User extends Authenticatable
         return $this->hasMany(
             related: OauthConnection::class,
             foreignKey: 'user_id'
+        );
+    }
+
+    public function accounts(): HasMany
+    {
+        return $this->hasMany(
+            related: Account::class,
+            foreignKey: 'user_id'
+        );
+    }
+
+    protected function firstName(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value = null) => $value ?? explode(' ', $this->name)[0],
+        );
+    }
+
+    protected function lastName(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value = null) => $value ?? (isset(explode(' ', $this->name)[1]) ? explode(' ', $this->name)[1] : null),
+        );
+    }
+
+    protected function phoneNumber(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value = null) => $this->phone,
         );
     }
 

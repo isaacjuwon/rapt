@@ -30,6 +30,7 @@
                 <flux:navlist.item icon="wallet" :href="route('wallet.index')" :current="request()->routeIs('wallet.index')" wire:navigate>{{ __('Wallet') }}</flux:navlist.item>
                 <flux:navlist.item icon="wallet" :href="route('wallet.fund')" :current="request()->routeIs('wallet.fund')" wire:navigate>{{ __('Fund Wallet') }}</flux:navlist.item>
                 <flux:navlist.item icon="currency-dollar" :href="route('shares.index')" :current="request()->routeIs('shares.index')" wire:navigate>{{ __('Shares') }}</flux:navlist.item>
+                <flux:navlist.item icon="arrows-right-left" :href="route('transactions.index')" :current="request()->routeIs('transactions.index')" wire:navigate>{{ __('Transactions') }}</flux:navlist.item>
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Loans')" class="grid">

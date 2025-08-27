@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-use Livewire\Livewire;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,25 +22,34 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Number::useCurrency('NGN');
 
-        $this->configureLoggingChannel();
-        
-         // --- Subdomain resolver setup ---
-   /* Livewire::setUpdateRoute(function ($handle) {
-        return Route::post('/livewire/update', $handle)
-            ->middleware(['web', 'sprout.tenanted']); // key part
-    });
+        $this->configureLoggingChannel(); // Keep this
 
-    // --- OR Path-based resolver setup ---
-    // If you're using Sprout's path resolver, you need to include the path param.
-    // Adjust {tenants_path} to match your Sprout config.
-    /** 
-    Livewire::setUpdateRoute(function ($handle) {
-        return Route::post('/{tenants_path}/livewire/update', $handle)
-            ->middleware(['web', 'sprout.tenanted']);
-    });
-    */
-    
+        // Configure asset URLs for subdirectory deployment
+        $this->configureAssetUrls();
+
+        // Implicitly grant "Super Admin" role all permissions
+        // This works in the app by using gate-related functions like auth()->user()->can() and @can()
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('super_admin') ? true : null;
+        });
+
+        // --- Subdomain resolver setup ---
+        /* Livewire::setUpdateRoute(function ($handle) {
+            return Route::post('/livewire/update', $handle)
+                ->middleware(['web', 'sprout.tenanted']); // key part
+        });
+
+        // --- OR Path-based resolver setup ---
+        // If you're using Sprout's path resolver, you need to include the path param.
+        // Adjust {tenants_path} to match your Sprout config.
+        /**
+        Livewire::setUpdateRoute(function ($handle) {
+            return Route::post('/{tenants_path}/livewire/update', $handle)
+                ->middleware(['web', 'sprout.tenanted']);
+        });
+        */
     }
 
     protected function configureLoggingChannel(): void
@@ -49,6 +59,26 @@ class AppServiceProvider extends ServiceProvider
 
         if ($logifyChannelConfig) {
             $config->set('logging.channels.' . $logifyChannelConfig['name'], $logifyChannelConfig);
+        }
+    }
+
+    protected function configureAssetUrls(): void
+    {
+        // Force asset URLs to use HTTPS in production
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+
+        // Set asset root for subdirectory deployment
+        $appUrl = config('app.url');
+        if ($appUrl && $appUrl !== 'http://localhost') {
+            $parsedUrl = parse_url($appUrl);
+            
+            // If there's a path component in APP_URL, use it as asset root
+            if (isset($parsedUrl['path']) && $parsedUrl['path'] !== '/') {
+                $assetRoot = rtrim($parsedUrl['path'], '/');
+                $this->app['url']->setAssetRoot($assetRoot);
+            }
         }
     }
 }
