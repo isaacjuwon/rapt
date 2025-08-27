@@ -25,6 +25,5 @@ jobs:
           exclude: |
             **/.git*
             **/vendor/**
-		**/node_modules/**
             **/tests/**
           dry-run: false
